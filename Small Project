@@ -1,0 +1,64 @@
+Simple Kubernetes Project on AWS
+✅ Goal: Deploy a sample app (e.g., "Hello World" web server) to a Kubernetes cluster running on AWS.
+
+✅ AWS Services Used:
+
+EKS (Elastic Kubernetes Service) — managed Kubernetes
+EC2 — (if you manually install Kubernetes instead of using EKS, but we'll use EKS here to keep it simple)
+IAM — (for permissions)
+VPC — (for networking, mostly auto-created by EKS)
+✅ Tools Required:
+
+AWS account
+kubectl (Kubernetes CLI tool)
+eksctl (EKS CLI tool to create clusters easily)
+aws-cli (AWS CLI)
+Docker (optional, if you want to build your own app image)
+Steps:
+1. Install the Tools (if not already installed)
+
+# Install aws-cli
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+# Install eksctl
+curl --location "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+
+# Install kubectl
+curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/latest/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin
+2. Configure AWS CLI
+
+aws configure
+# Enter your AWS Access Key, Secret Key, region (like us-east-1), and output format
+3. Create an EKS Cluster with eksctl
+
+eksctl create cluster --name simple-cluster --region us-east-1 --nodes 2
+This will create:
+A VPC
+EC2 worker nodes
+EKS Control Plane
+
+
+4. Deploy a Simple App (e.g., Nginx)
+
+Create a Kubernetes Deployment:
+
+kubectl create deployment hello-world --image=nginx
+Expose it using a LoadBalancer service:
+
+kubectl expose deployment hello-world --type=LoadBalancer --port=80 --target-port=80
+5. Get the Public URL
+
+kubectl get service hello-world
+Look for the EXTERNAL-IP — after a few minutes, AWS will assign an ELB (Elastic Load Balancer) URL.
+Open that URL in your browser.
+You’ll see the default Nginx Welcome Page.
+
+
+
+Summary Diagram
+[User] ---> [AWS Load Balancer] ---> [EKS Nodes] ---> [Nginx Pod]
